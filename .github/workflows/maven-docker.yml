@@ -28,15 +28,33 @@ jobs:
       # 3️ Build Maven project (skip tests if you want)
       - name: Build Maven project
         run: mvn clean package spring-boot:repackage -DskipTests
+      
+      # 4 SonarQube analysis
+      - name: SonarQube Scan
+        uses: SonarSource/sonarqube-scan-action@v2
+        with:
+          args: >
+            -Dsonar.projectKey=weather-microservice
+            -Dsonar.host.url=${{ secrets.SONAR_HOST_URL }}
+            -Dsonar.login=${{ secrets.SONAR_TOKEN }}
 
-      # 4️ Login to Docker Hub
+      # 5 Login to Docker Hub
       - name: Login to Docker Hub
         run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
-      # 5️ Build Docker image
+      # 6 Build Docker image
       - name: Build Docker image
-        run: docker build -t ${{ secrets.DOCKER_USERNAME }}/weather-microservice:latest .
+        run: docker build -t ${{ secrets.DOCKER_USERNAME }}/weather-microservice:sec .
 
-      # 6️ Push Docker image to Docker Hub
+      # 5 Trivy Security Scan
+      - name: Scan Docker image with Trivy
+        uses: aquasecurity/trivy-action@0.19.0
+        with:
+          image-ref: ${{ secrets.DOCKER_USERNAME }}/weather-microservice:sec
+          format: 'table'
+          severity: 'CRITICAL,HIGH'
+          exit-code: '0'  # change to '1' if you want pipeline to fail on vulnerabilities
+
+      # 7 Push Docker image to Docker Hub
       - name: Push Docker image
-        run: docker push ${{ secrets.DOCKER_USERNAME }}/weather-microservice:latest
+        run: docker push ${{ secrets.DOCKER_USERNAME }}/weather-microservice:sec
