@@ -1,0 +1,35 @@
+{
+  "family": "weather-task",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "512",
+  "memory": "1024",
+  "executionRoleArn": "arn:aws:iam::992382810585:role/ecsTaskExecutionRole",
+  "containerDefinitions": [
+    {
+      "name": "weather-container",
+      "image": "docker.io/saikumar403/weather-microservice:sec",
+      "portMappings": [
+        {
+          "containerPort": 8080,
+          "protocol": "tcp"
+        }
+      ],
+      "environment": [
+        {
+          "name": "SPRING_DATASOURCE_URL",
+          "value": "${SPRING_DATASOURCE_URL}"
+        },
+        {
+          "name": "SPRING_DATASOURCE_USERNAME",
+          "value": "${SPRING_DATASOURCE_USERNAME}"
+        },
+        {
+          "name": "SPRING_DATASOURCE_PASSWORD",
+          "value": "${SPRING_DATASOURCE_PASSWORD}"
+        }
+      ],
+      "essential": true
+    }
+  ]
+}
