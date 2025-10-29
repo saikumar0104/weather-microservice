@@ -30,7 +30,7 @@ jobs:
         id: render-task-def
         uses: aws-actions/amazon-ecs-render-task-definition@v1
         with:
-          task-definition: ecs-task-def.json
+          task-definition: .github/workflows/ecs-task-def.json
           container-name: ${{ secrets.CONTAINER_NAME }}
           image: docker.io/saikumar403/weather-microservice:sec
 
