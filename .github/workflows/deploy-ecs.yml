@@ -22,9 +22,9 @@ jobs:
       # 🔧 Replace placeholders with secret values
       - name: Inject environment variables into ECS task
         run: |
-          sed -i "s|\${SPRING_DATASOURCE_URL}|${{ secrets.SPRING_DATASOURCE_URL }}|g" ecs-task-def.json
-          sed -i "s|\${SPRING_DATASOURCE_USERNAME}|${{ secrets.SPRING_DATASOURCE_USERNAME }}|g" ecs-task-def.json
-          sed -i "s|\${SPRING_DATASOURCE_PASSWORD}|${{ secrets.SPRING_DATASOURCE_PASSWORD }}|g" ecs-task-def.json
+          sed -i "s|\${SPRING_DATASOURCE_URL}|${{ secrets.SPRING_DATASOURCE_URL }}|g" .github/workflows/ecs-task-def.json
+          sed -i "s|\${SPRING_DATASOURCE_USERNAME}|${{ secrets.SPRING_DATASOURCE_USERNAME }}|g" .github/workflows/ecs-task-def.json
+          sed -i "s|\${SPRING_DATASOURCE_PASSWORD}|${{ secrets.SPRING_DATASOURCE_PASSWORD }}|g" .github/workflows/ecs-task-def.json
 
       - name: Render ECS task definition
         id: render-task-def
