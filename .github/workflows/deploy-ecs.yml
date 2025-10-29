@@ -41,11 +41,3 @@ jobs:
           service: ${{ secrets.ECS_SERVICE }}
           cluster: ${{ secrets.ECS_CLUSTER }}
           wait-for-service-stability: true
-          network-configuration: |
-            awsvpcConfiguration:
-              subnets:
-                - ${{ secrets.AWS_SUBNET_1 }}
-                - ${{ secrets.AWS_SUBNET_2 }}
-              securityGroups:
-                - ${{ secrets.AWS_SECURITY_GROUP }}
-              assignPublicIp: ENABLED
