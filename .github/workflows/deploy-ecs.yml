@@ -36,7 +36,6 @@ jobs:
         working-directory: ./terraform
         run: |
           terraform apply -auto-approve \
-          #            -var="docker_image=${{ secrets.DOCKER_IMAGE }}" \
             -var="spring_datasource_url=${{ secrets.SPRING_DATASOURCE_URL }}" \
             -var="spring_datasource_username=${{ secrets.SPRING_DATASOURCE_USERNAME }}" \
             -var="spring_datasource_password=${{ secrets.SPRING_DATASOURCE_PASSWORD }}"
