@@ -1,24 +1,21 @@
-name: Deploy to Amazon ECS
+name: Destroy ECS Resources
 
 on:
   workflow_dispatch:
 
 jobs:
-  deploy:
+  destroy:
     runs-on: ubuntu-latest
 
     steps:
-      # 1️ Checkout repository
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2️ Set up Terraform
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: 1.9.2
 
-      # 3️ Configure AWS Credentials
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -26,16 +23,15 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ap-south-1
 
-      # 4️ Initialize Terraform
       - name: Terraform Init
         working-directory: ./terraform
         run: terraform init
 
-      # 5️ Terraform Apply
-      - name: Terraform Apply
+      - name: Terraform Destroy
         working-directory: ./terraform
         run: |
-          terraform apply -auto-approve \
+          terraform destroy -auto-approve \
+            -var="region=ap-south-1" \
             -var="docker_image=${{ secrets.DOCKER_IMAGE }}" \
             -var="spring_datasource_url=${{ secrets.SPRING_DATASOURCE_URL }}" \
             -var="spring_datasource_username=${{ secrets.SPRING_DATASOURCE_USERNAME }}" \
