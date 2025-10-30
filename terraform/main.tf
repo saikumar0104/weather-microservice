@@ -2,56 +2,59 @@ provider "aws" {
   region = var.region
 }
 
-# --------------------------------------------------------
-# ECS Cluster
-# --------------------------------------------------------
+# ✅ Get AWS account ID (used for existing IAM role reference)
+data "aws_caller_identity" "current" {}
+
+# ✅ ECS Cluster
 resource "aws_ecs_cluster" "weather_cluster" {
   name = "weather-cluster"
 }
 
-# --------------------------------------------------------
-# IAM Role for ECS Task Execution
-# --------------------------------------------------------
-resource "aws_iam_role" "ecs_task_execution_role" {
-  name = "ecsTaskExecutionRole"
+# ✅ Security Group for ECS Tasks
+resource "aws_security_group" "ecs_sg" {
+  name        = "ecs-weather-sg"
+  description = "Allow inbound traffic for Weather Microservice"
+  vpc_id      = var.vpc_id
 
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Action = "sts:AssumeRole"
-        Effect = "Allow"
-        Principal = {
-          Service = "ecs-tasks.amazonaws.com"
-        }
-      }
-    ]
-  })
+  # Allow HTTP traffic for the microservice
+  ingress {
+    from_port   = 8080
+    to_port     = 8080
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  # Allow PostgreSQL access
+  ingress {
+    from_port   = 5432
+    to_port     = 5432
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
 }
 
-resource "aws_iam_role_policy_attachment" "ecs_task_execution_role_policy" {
-  role       = aws_iam_role.ecs_task_execution_role.name
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
-}
-
-# --------------------------------------------------------
-# CloudWatch Log Group for ECS
-# --------------------------------------------------------
-resource "aws_cloudwatch_log_group" "ecs_logs" {
+# ✅ CloudWatch Log Group for ECS container logs
+resource "aws_cloudwatch_log_group" "weather_logs" {
   name              = "/ecs/weather-microservice"
   retention_in_days = 7
 }
 
-# --------------------------------------------------------
-# ECS Task Definition
-# --------------------------------------------------------
+# ✅ ECS Task Definition (reuses existing IAM Role)
 resource "aws_ecs_task_definition" "weather_task" {
   family                   = "weather-task"
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
   cpu                      = "1024"
   memory                   = "3072"
-  execution_role_arn       = aws_iam_role.ecs_task_execution_role.arn
+
+  execution_role_arn = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/ecsTaskExecutionRole"
 
   container_definitions = jsonencode([
     {
@@ -71,7 +74,7 @@ resource "aws_ecs_task_definition" "weather_task" {
       logConfiguration = {
         logDriver = "awslogs"
         options = {
-          awslogs-group         = aws_cloudwatch_log_group.ecs_logs.name
+          awslogs-group         = aws_cloudwatch_log_group.weather_logs.name
           awslogs-region        = var.region
           awslogs-stream-prefix = "ecs"
         }
@@ -80,9 +83,7 @@ resource "aws_ecs_task_definition" "weather_task" {
   ])
 }
 
-# --------------------------------------------------------
-# ECS Service
-# --------------------------------------------------------
+# ✅ ECS Service
 resource "aws_ecs_service" "weather_service" {
   name            = "weather-service"
   cluster         = aws_ecs_cluster.weather_cluster.id
@@ -92,11 +93,7 @@ resource "aws_ecs_service" "weather_service" {
 
   network_configuration {
     subnets          = var.subnet_ids
+    security_groups  = [aws_security_group.ecs_sg.id]
     assign_public_ip = true
   }
-
-  depends_on = [
-    aws_iam_role_policy_attachment.ecs_task_execution_role_policy,
-    aws_cloudwatch_log_group.ecs_logs
-  ]
 }

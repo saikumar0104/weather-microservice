@@ -2,10 +2,12 @@
 name: Maven Build & Docker
 
 # Trigger on push to main branch or manual trigger
+#on:
+#  push:
+#    branches:
+#      - main
+#  workflow_dispatch:
 on:
-  push:
-    branches:
-      - main
   workflow_dispatch:
 
 jobs:
