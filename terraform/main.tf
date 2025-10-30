@@ -97,3 +97,13 @@ resource "aws_ecs_service" "weather_service" {
     assign_public_ip = true
   }
 }
+
+#This will be used by destroy file because it requires state file to detroy so will store file is s3
+terraform {
+  backend "s3" {
+    bucket         = "s3bucketweather"    # replace with your S3 bucket name
+    key            = "weather/terraform.tfstate"
+    region         = "ap-south-1"
+  }
+}
+
