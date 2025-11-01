@@ -5,6 +5,81 @@ provider "aws" {
 # ✅ Get AWS account ID (used for existing IAM role reference)
 data "aws_caller_identity" "current" {}
 
+#############################
+# ✅ VPC and Network Setup  #
+#############################
+
+# ✅ Create VPC
+resource "aws_vpc" "weather_vpc" {
+  cidr_block = "10.0.0.0/16"
+
+  tags = {
+    Name = "weather-vpc"
+  }
+}
+
+# ✅ Create Internet Gateway
+resource "aws_internet_gateway" "weather_igw" {
+  vpc_id = aws_vpc.weather_vpc.id
+
+  tags = {
+    Name = "weather-igw"
+  }
+}
+
+# ✅ Create Public Subnet 1 (AZ A)
+resource "aws_subnet" "public_subnet_1" {
+  vpc_id                  = aws_vpc.weather_vpc.id
+  cidr_block              = "10.0.1.0/24"
+  availability_zone       = "${var.region}a"
+  map_public_ip_on_launch = true
+
+  tags = {
+    Name = "weather-public-subnet-1"
+  }
+}
+
+# ✅ Create Public Subnet 2 (AZ B)
+resource "aws_subnet" "public_subnet_2" {
+  vpc_id                  = aws_vpc.weather_vpc.id
+  cidr_block              = "10.0.2.0/24"
+  availability_zone       = "${var.region}b"
+  map_public_ip_on_launch = true
+
+  tags = {
+    Name = "weather-public-subnet-2"
+  }
+}
+
+# ✅ Create Route Table
+resource "aws_route_table" "weather_route_table" {
+  vpc_id = aws_vpc.weather_vpc.id
+
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.weather_igw.id
+  }
+
+  tags = {
+    Name = "weather-public-route-table"
+  }
+}
+
+# ✅ Associate Route Table with both Subnets
+resource "aws_route_table_association" "public_subnet_1_assoc" {
+  subnet_id      = aws_subnet.public_subnet_1.id
+  route_table_id = aws_route_table.weather_route_table.id
+}
+
+resource "aws_route_table_association" "public_subnet_2_assoc" {
+  subnet_id      = aws_subnet.public_subnet_2.id
+  route_table_id = aws_route_table.weather_route_table.id
+}
+
+#################################
+# ✅ Application-Level Resources #
+#################################
+
 # ✅ ECS Cluster
 resource "aws_ecs_cluster" "weather_cluster" {
   name = "weather-cluster"
@@ -14,7 +89,7 @@ resource "aws_ecs_cluster" "weather_cluster" {
 resource "aws_security_group" "ecs_sg" {
   name        = "ecs-weather-sg"
   description = "Allow inbound traffic for Weather Microservice"
-  vpc_id      = var.vpc_id
+  vpc_id      = aws_vpc.weather_vpc.id
 
   # Allow HTTP traffic for the microservice
   ingress {
@@ -24,7 +99,7 @@ resource "aws_security_group" "ecs_sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  # Allow PostgreSQL access
+  # Allow PostgreSQL access (from anywhere, change if needed)
   ingress {
     from_port   = 5432
     to_port     = 5432
@@ -92,16 +167,19 @@ resource "aws_ecs_service" "weather_service" {
   desired_count   = 1
 
   network_configuration {
-    subnets          = var.subnet_ids
+    subnets          = [
+      aws_subnet.public_subnet_1.id,
+      aws_subnet.public_subnet_2.id
+    ]
     security_groups  = [aws_security_group.ecs_sg.id]
     assign_public_ip = true
   }
 }
 
-#This will be used by destroy file because it requires state file to detroy so will store file is s3
+# ✅ S3 Backend (for Terraform state)
 terraform {
   backend "s3" {
-    bucket         = "s3bucketweather"    # replace with your S3 bucket name
+    bucket         = "s3bucketweather"
     key            = "weather/terraform.tfstate"
     region         = "ap-south-1"
   }

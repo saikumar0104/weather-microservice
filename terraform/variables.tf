@@ -4,17 +4,17 @@ variable "region" {
   default     = "ap-south-1"
 }
 
-variable "vpc_id" {
-  description = "VPC ID where ECS should run"
-  type        = string
-  default     = "vpc-0282307275309e52d" # replace with your default VPC ID
-}
+#variable "vpc_id" {
+#  description = "VPC ID where ECS should run"
+#  type        = string
+#  default     = "vpc-0282307275309e52d" # replace with your default VPC ID
+#}
 
-variable "subnet_ids" {
-  description = "Subnets for ECS tasks"
-  type        = list(string)
-  default     = ["subnet-060f166f319d3926c", "subnet-09b0e0d0168eceedf"] # replace with your actual subnet IDs
-}
+#variable "subnet_ids" {
+#  description = "Subnets for ECS tasks"
+#  type        = list(string)
+#  default     = ["subnet-060f166f319d3926c", "subnet-09b0e0d0168eceedf"] # replace with your actual subnet IDs
+#}
 
 variable "docker_image" {
   description = "Full Docker image name (from Docker Hub)"
