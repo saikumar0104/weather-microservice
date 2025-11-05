@@ -1,30 +1,19 @@
-TempWindX is a cloud-native weather service built with **Spring Boot**, containerized using **Docker**, deployed on **AWS ECS**, and fully automated through **GitHub Actions** and **Terraform**.
+# 🌦️ TempWindX - Weather Microservice
+
+TempWindX is a weather microservice that fetches real-time weather data from [metio.com](https://metio.com) API,  
+processes this data, and writes it to a PostgreSQL database.
+
+A separate microservice then reads the stored weather data from the database, converts it into metrics, and pushes those metrics to a Prometheus Gateway for monitoring.  
+
+Prometheus and Grafana are deployed on Kubernetes clusters to collect and visualize these metrics.
 
 ## 🚀 Architecture Overview
 
 <img width="940" height="502" alt="image" src="https://github.com/user-attachments/assets/9311d7da-f948-4ed0-86cd-4209e5eaee41" />
 
 ## 📁 Project Structure
-├── .github
-│ └── workflows
-│ ├── maven-docker.yml # CI - Build, scan & push Docker image
-│ ├── deploy-ecs.yml # CD - Deploy app to ECS
-│ └── destroy-ecs.yml # Tear down AWS resources
-├── Dockerfile # Builds Docker image for app
-├── README.md
-├── pom.xml # Maven configuration
-├── src/
-│ ├── main/java/com/example/weather/
-│ │ ├── Weather.java
-│ │ ├── WeatherApplication.java
-│ │ ├── WeatherRepository.java
-│ │ └── WeatherService.java
-│ └── resources/application.properties
-└── terraform/
-├── main.tf
-├── outputs.tf
-├── terraform.tfvars
-└── variables.tf
+
+<pre> ```plaintext .github/ ├── workflows/ │ ├── maven-docker.yml # CI - Build, scan & push Docker image │ ├── deploy-ecs.yml # CD - Deploy app to ECS │ └── destroy-ecs.yml # Tear down AWS resources Dockerfile # Builds Docker image for app README.md pom.xml # Maven configuration src/ ├── main/ │ ├── java/ │ │ └── com/ │ │ └── example/ │ │ └── weather/ │ │ ├── Weather.java │ │ ├── WeatherApplication.java │ │ ├── WeatherRepository.java │ │ └── WeatherService.java │ └── resources/ │ └── application.properties terraform/ ├── main.tf ├── outputs.tf ├── terraform.tfvars └── variables.tf ``` </pre>
 
 ------------------------
 ### 🔹 Workflow Summary
