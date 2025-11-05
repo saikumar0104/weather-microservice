@@ -1,7 +1,6 @@
 # 🌦️ TempWindX - Weather Microservice
 
-TempWindX is a weather microservice that fetches real-time weather data from [metio.com](https://metio.com) API,  
-processes this data, and writes it to a PostgreSQL database.
+TempWindX is a weather microservice that fetches real-time weather data from [metio.com](https://metio.com) API, processes this data, and writes it to a PostgreSQL database.
 
 A separate microservice then reads the stored weather data from the database, converts it into metrics, and pushes those metrics to a Prometheus Gateway for monitoring.  
 
@@ -13,7 +12,26 @@ Prometheus and Grafana are deployed on Kubernetes clusters to collect and visual
 
 ## 📁 Project Structure
 
-<pre> ```plaintext .github/ ├── workflows/ │ ├── maven-docker.yml # CI - Build, scan & push Docker image │ ├── deploy-ecs.yml # CD - Deploy app to ECS │ └── destroy-ecs.yml # Tear down AWS resources Dockerfile # Builds Docker image for app README.md pom.xml # Maven configuration src/ ├── main/ │ ├── java/ │ │ └── com/ │ │ └── example/ │ │ └── weather/ │ │ ├── Weather.java │ │ ├── WeatherApplication.java │ │ ├── WeatherRepository.java │ │ └── WeatherService.java │ └── resources/ │ └── application.properties terraform/ ├── main.tf ├── outputs.tf ├── terraform.tfvars └── variables.tf ``` </pre>
+├── .github
+│ └── workflows
+│ ├── maven-docker.yml # CI - Build, scan & push Docker image
+│ ├── deploy-ecs.yml # CD - Deploy app to ECS
+│ └── destroy-ecs.yml # Tear down AWS resources
+├── Dockerfile # Builds Docker image for app
+├── README.md
+├── pom.xml # Maven configuration
+├── src/
+│ ├── main/java/com/example/weather/
+│ │ ├── Weather.java
+│ │ ├── WeatherApplication.java
+│ │ ├── WeatherRepository.java
+│ │ └── WeatherService.java
+│ └── resources/application.properties
+└── terraform/
+├── main.tf
+├── outputs.tf
+├── terraform.tfvars
+└── variables.tf
 
 ------------------------
 ### 🔹 Workflow Summary
