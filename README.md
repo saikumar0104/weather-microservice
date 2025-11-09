@@ -75,3 +75,7 @@ Infrastructure managed as code via Terraform
 Secrets managed in GitHub Actions or AWS Secrets Manager
 Immutable image-based deployments
 
+Visualize data from grafan:
+<img width="800" height="396" alt="image" src="https://github.com/user-attachments/assets/c1c0d471-40c5-4720-86b7-2d101b4da87b" />
+
+
